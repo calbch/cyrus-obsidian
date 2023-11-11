@@ -2,8 +2,9 @@ export const handshake = async (url: string): Promise<boolean> => {
 	try {
 		const response = await fetch(`${url}/handshake`, {
 			method: "HEAD",
-			mode: "no-cors",
+			// mode: "no-cors",
 		});
+
 		return response.ok;
 	} catch {
 		return false;

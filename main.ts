@@ -67,13 +67,14 @@ export default class Cyrus extends Plugin {
 									);
 									const { class: pdfClass, result } =
 										response;
+
 									new Notice(
 										"Successfully processed PDF file! 🎉"
 									);
 
 									const newPdfPath = path.join(
 										pdfPath,
-										activeFile.basename
+										activeFile.name
 									);
 
 									this.app.fileManager.renameFile(
@@ -81,19 +82,19 @@ export default class Cyrus extends Plugin {
 										newPdfPath
 									);
 
-									const note = await this.app.vault.create(
-										notePath,
-										result
-									);
+									// const note = await this.app.vault.create(
+									// 	notePath,
+									// 	result
+									// );
 
-									this.app.fileManager.processFrontMatter(
-										note,
-										(frontmatter) => {
-											frontmatter["class"] = pdfClass;
-											// frontmatter["pdf"] =
-											// 	this.app.fileManager.generateMarkdownLink();
-										}
-									);
+									// this.app.fileManager.processFrontMatter(
+									// 	note,
+									// 	(frontmatter) => {
+									// 		frontmatter["class"] = pdfClass;
+									// 		// frontmatter["pdf"] =
+									// 		// 	this.app.fileManager.generateMarkdownLink();
+									// 	}
+									// );
 								}
 							} catch {
 								new Notice("Error processing PDF file ⚰️");
@@ -112,7 +113,7 @@ export default class Cyrus extends Plugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-			console.log("click", evt);
+			// console.log("click", evt);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
