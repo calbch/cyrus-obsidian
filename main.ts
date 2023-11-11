@@ -22,16 +22,11 @@ export default class Cyrus extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		const { serverUrl, pdfPath, notePath } = this.settings;
+		const { serverUrl, pdfPath } = this.settings;
 
 		this.app.vault
 			.createFolder(pdfPath)
-			.catch(() =>
-				console.info(`PDF-Folder at ${pdfPath} already setup ✅`)
-			);
-		this.app.vault
-			.createFolder(notePath)
-			.catch(() => console.info(`Note-Folder already setup ✅`));
+			.catch(() => console.info(`PDF-Folder at ${pdfPath} already setup ✅`));
 
 		this.status = this.addStatusBarItem();
 
@@ -48,70 +43,48 @@ export default class Cyrus extends Plugin {
 					// If checking is false, then we want to actually perform the operation.
 					if (!checking) {
 						(async () => {
-							const file = await this.app.vault.readBinary(
-								activeFile
-							);
+							const file = await this.app.vault.readBinary(activeFile);
 							try {
 								new Notice("Processing PDF file... 🚀");
-								const response = await processFile(
-									serverUrl,
-									file,
-									["test"]
-								);
+								const response = await processFile(serverUrl, file, ["test"]);
 								if (response) {
-									console.log(
-										"PDF processing response: ",
-										response
-									);
-									const { class: pdfClass, result } =
-										response;
+									console.log("[Cyrus]: PDF processing response: ", response);
+									const { class: pdfClass, result } = response;
 
-									new Notice(
-										"Successfully processed PDF file! 🎉"
-									);
+									new Notice("Successfully processed PDF file! 🎉");
 
-									const newPdfPath = path.join(
-										pdfPath,
-										activeFile.name
-									);
+									const newPdfPath = path.join(pdfPath, activeFile.name);
 
-									this.app.fileManager.renameFile(
-										activeFile,
-										newPdfPath
-									);
+									this.app.fileManager.renameFile(activeFile, newPdfPath);
 
-									const noteFolder =
-										this.app.fileManager.getNewFileParent(
-											activeFile.path
-										);
-
-									console.log(
-										"BASENAME: ",
-										activeFile.basename
+									const noteFolder = this.app.fileManager.getNewFileParent(
+										activeFile.path
 									);
 
 									const note = await this.app.vault.create(
-										path.join(
-											noteFolder.path,
-											`${activeFile.basename}.md`
-										),
+										path.join(noteFolder.path, `${activeFile.basename}.md`),
 										result
 									);
+
+									const pdfLink = this.app.fileManager.generateMarkdownLink(
+										activeFile,
+										note.path
+									);
+
+									this.app.fileManager.processFrontMatter(
+										note,
+										(frontmatter) => {
+											frontmatter["class"] = pdfClass;
+											frontmatter["summarySource"] = pdfLink.replace("!", "");
+										}
+									);
+
 									const noteLeaf = this.app.workspace.getLeaf(
 										"split",
 										"vertical"
 									);
 
 									noteLeaf.openFile(note);
-
-									// this.app.fileManager.processFrontMatter(
-									// 	note,
-									// 	(frontmatter) => {
-									// 		frontmatter["class"] = pdfClass;
-									// 		// frontmatter["pdf"] =
-									// 		// 	this.app.fileManager.generateMarkdownLink();
-									// 	}
-									// );
 								}
 							} catch {
 								new Notice("Error processing PDF file ⚰️");
@@ -142,11 +115,7 @@ export default class Cyrus extends Plugin {
 	onunload() {}
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData()
-		);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
 	async saveSettings() {
@@ -194,9 +163,7 @@ class CyrusSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Classes")
-			.setDesc(
-				"The classes you are currently taking are used to tag notes."
-			)
+			.setDesc("The classes you are currently taking are used to tag notes.")
 			.addTextArea((text) =>
 				text
 					.setPlaceholder("Enter the classes, separated by commas")
