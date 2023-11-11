@@ -1,4 +1,5 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
+import { processFile } from "service";
 
 import { setHandshakeStatus } from "utils";
 
@@ -26,13 +27,26 @@ export default class Cyrus extends Plugin {
 			id: "cyrus-process-pdf",
 			name: "Process PDF",
 			checkCallback: (checking: boolean) => {
-				const pdfView =
-					this.app.workspace.getActiveFile()?.extension === "pdf";
+				const activeFile = this.app.workspace.getActiveFile();
+				const pdfView = activeFile?.extension === "pdf";
 				if (pdfView) {
 					// If checking is true, we're simply "checking" if the command can be run.
 					// If checking is false, then we want to actually perform the operation.
 					if (!checking) {
-						new Notice("Processing PDF");
+						(async () => {
+							console.log("active file path", activeFile.path);
+							const file = await this.app.vault.readBinary(
+								activeFile
+							);
+							try {
+								new Notice("Processing PDF file... 🚀");
+								processFile(this.settings.serverUrl, file, [
+									"test",
+								]);
+							} catch {
+								new Notice("Error processing PDF file ⚰️");
+							}
+						})();
 					}
 
 					// This command will only show up in Command Palette when the check function returns true
