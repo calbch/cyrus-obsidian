@@ -1,7 +1,9 @@
 export const handshake = async (url: string): Promise<boolean> => {
-	console.log(`${url}/handshake`);
 	try {
-		const response = await fetch(`${url}/handshake`, { method: "HEAD" });
+		const response = await fetch(`${url}/handshake`, {
+			method: "HEAD",
+			mode: "no-cors",
+		});
 		return response.ok;
 	} catch {
 		return false;
@@ -12,7 +14,7 @@ export const processFile = async (
 	url: string,
 	file: ArrayBuffer,
 	classes: string[]
-): Promise<void> => {
+): Promise<{ class: string; result: string }> => {
 	const formData = new FormData();
 
 	try {
@@ -23,17 +25,19 @@ export const processFile = async (
 			})
 		);
 		formData.append("classes", JSON.stringify(classes));
+		const response = await fetch(`${url}/process`, {
+			method: "POST",
+			body: formData,
+			mode: "no-cors",
+		});
+
+		if (!response.ok) {
+			throw new Error(`Server responded with ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (err) {
 		console.error(`Failed to submit file to ${url}/process`);
 		throw err;
-	}
-
-	const response = await fetch(`${url}/process`, {
-		method: "POST",
-		body: formData,
-	});
-
-	if (!response.ok) {
-		throw new Error(`Server responded with ${response.status}`);
 	}
 };
