@@ -8,14 +8,12 @@ interface CyrusSettings {
 	serverUrl: string;
 	classes: string[];
 	pdfPath: string;
-	notePath: string;
 }
 
 const DEFAULT_SETTINGS: CyrusSettings = {
 	serverUrl: "http://127.0.0.1:5000",
 	classes: ["computer science", "mathematics", "physics"],
 	pdfPath: "/assets/pdf",
-	notePath: "/inbox",
 };
 
 export default class Cyrus extends Plugin {
@@ -82,10 +80,29 @@ export default class Cyrus extends Plugin {
 										newPdfPath
 									);
 
-									// const note = await this.app.vault.create(
-									// 	notePath,
-									// 	result
-									// );
+									const noteFolder =
+										this.app.fileManager.getNewFileParent(
+											activeFile.path
+										);
+
+									console.log(
+										"BASENAME: ",
+										activeFile.basename
+									);
+
+									const note = await this.app.vault.create(
+										path.join(
+											noteFolder.path,
+											`${activeFile.basename}.md`
+										),
+										result
+									);
+									const noteLeaf = this.app.workspace.getLeaf(
+										"split",
+										"vertical"
+									);
+
+									noteLeaf.openFile(note);
 
 									// this.app.fileManager.processFrontMatter(
 									// 	note,
@@ -200,18 +217,6 @@ class CyrusSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.pdfPath)
 					.onChange((value) => {
 						this.plugin.settings.pdfPath = value;
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Note Path")
-			.setDesc("This is the path where notes are stored.")
-			.addText((text) =>
-				text
-					.setPlaceholder("Enter the note path")
-					.setValue(this.plugin.settings.notePath)
-					.onChange((value) => {
-						this.plugin.settings.notePath = value;
 					})
 			);
 	}
