@@ -1,4 +1,5 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
+import * as path from "path";
 import { processFile } from "service";
 
 import { setHandshakeStatus } from "utils";
@@ -20,7 +21,6 @@ const DEFAULT_SETTINGS: CyrusSettings = {
 export default class Cyrus extends Plugin {
 	settings: CyrusSettings;
 	status: HTMLElement;
-	canProcess = false;
 
 	async onload() {
 		await this.loadSettings();
@@ -61,14 +61,20 @@ export default class Cyrus extends Plugin {
 									["test"]
 								);
 								if (response) {
+									console.log(
+										"PDF processing response: ",
+										response
+									);
 									const { class: pdfClass, result } =
 										response;
 									new Notice(
 										"Successfully processed PDF file! 🎉"
 									);
 
-									const newPdfPath =
-										pdfPath + activeFile.basename;
+									const newPdfPath = path.join(
+										pdfPath,
+										activeFile.basename
+									);
 
 									this.app.fileManager.renameFile(
 										activeFile,

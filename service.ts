@@ -28,7 +28,7 @@ export const processFile = async (
 		const response = await fetch(`${url}/process`, {
 			method: "POST",
 			body: formData,
-			mode: "no-cors",
+			// mode: "no-cors",
 		});
 
 		if (!response.ok) {
