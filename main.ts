@@ -2,7 +2,7 @@ import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
 import * as path from "path";
 import { processFile } from "service";
 
-import { setHandshakeStatus } from "utils";
+import { getResultMarkdown, setHandshakeStatus } from "utils";
 
 interface CyrusSettings {
 	serverUrl: string;
@@ -61,9 +61,14 @@ export default class Cyrus extends Plugin {
 										activeFile.path
 									);
 
+									const resultMarkdown = await getResultMarkdown({
+										title: activeFile.basename,
+										result,
+									});
+
 									const note = await this.app.vault.create(
 										path.join(noteFolder.path, `${activeFile.basename}.md`),
-										result
+										resultMarkdown
 									);
 
 									const pdfLink = this.app.fileManager.generateMarkdownLink(

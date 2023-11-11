@@ -12,3 +12,14 @@ export const setHandshakeStatus = async (
 		status.setText("Cyrus unavailable ❌");
 	}
 };
+
+// use remark if necessary
+export const getResultMarkdown = async ({
+	title,
+	result,
+}: {
+	title: string;
+	result: string;
+}): Promise<string> => {
+	return `# ${title}\n\n## Summary\n\n${result}`;
+};
